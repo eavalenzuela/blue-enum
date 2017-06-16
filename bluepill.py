@@ -1,5 +1,4 @@
 import re, sys, os
-#import argparse
 import ipaddress
 from subprocess import Popen, PIPE
 import xml.etree.ElementTree
@@ -11,10 +10,6 @@ import xml.etree.ElementTree
 #	Eric Valenzuela, eevn.io
 #	June 14, 2017
 #
-
-#parser = argparse.ArgumentParser(description='BluePill scanner')
-#parser.add_argument('ip', type=str, help='an ip address or CIDR block to scan, e.g. "192.168.0.1", "192.168.0.0/24"')
-#args = parser.parse_args()
 
 ##### Main Menu funtion --start--
 def menu (mitem):
@@ -105,7 +100,6 @@ def scanner (addresses):
 
     for i in addresses:
         if not os.path.isfile('./bluepill_outputs/' + i + '.xml'):
-            print("running NMAP for " + i)
             p = Popen(["nmap", "-A", "-oX"] + ["./bluepill_outputs/" + i + ".xml"] + [str(i)], stdout=PIPE)
             (output, err) = p.communicate()
             exit_code = p.wait()
@@ -170,13 +164,12 @@ def removeitem(addr):
     print('\nPlease enter the IP address(es) you want to remove.\nNote that all associated files will also be removed.')
     try:
         remips = None
-        #print(sys.version_info)
         if sys.version_info < (3, 0):
             print("python version < 3.0 detected...\n")
-            inp = unicode(raw_input('new_ips>'))
+            inp = unicode(raw_input('rem_ips>'))
         else:
             print("python 3.0+ detected...\n")
-            inp = unicode(input('new_ips>'))
+            inp = unicode(input('rem_ips>'))
         remips = ipaddress.ip_network(inp)
     except TypeError:
         print("Invalid entry.")
@@ -203,16 +196,17 @@ def removeitem(addr):
 ##### XML Parse-to-enumerators --start--
 def parse2enums(addresses):
     for i in addresses:
-        etree = xml.etree.ElementTree.parse('./bluepill_outputs/'+ i + '.xml')
-        etroot = etree.getroot()
-        #print(etroot.tag, etroot.attrib)
-        xmllooper(etroot, i)
+        try:
+            etree = xml.etree.ElementTree.parse('./bluepill_outputs/'+ i + '.xml')
+            etroot = etree.getroot()
+            xmllooper(etroot, i)
+        except:
+            print("Error occurred on XML parse for " + i + ". Check file for malformity, or remove and re-scan.")
 ##### XML Parse-to-enumerators --end--
 
 ##### XML Structure Loop --start--
 def xmllooper(parent, ip):
     for child in parent:
-        #print(child.tag, child.attrib)
         if child.tag == 'port':
             if child.get('portid') == "80":
                 print(ip + " is running a webserver! Nikto time!")
@@ -238,17 +232,6 @@ messages = [None]
 menuitem = None
 addr = [None]
 ##### Global vars --end--
-
-"""
-try:
-    if args.ip != None:
-        addr = ipaddress.ip_network(unicode(args.ip))
-    else:
-        print("that's not valid, yo!")
-        print(args.ip)
-except:
-    print("exception, yo!", sys.exc_info()[0], sys.exc_info()[1])
-"""
 
 ##### Main loop --start--
 while menuitem != 6:
@@ -280,5 +263,5 @@ while menuitem != 6:
 ##### Main loop --end--
 
 # Final message output (non-error, informational)
-for m in messages:
-        print (m)
+#for m in messages:
+#        print (m)
