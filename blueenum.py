@@ -4,7 +4,7 @@ from subprocess import Popen, PIPE
 import xml.etree.ElementTree
 
 #
-#	bluepill.py
+#	blueenum.py
 #		a custom scanning script I built for the OSCP
 #
 #	Eric Valenzuela, eevn.io
@@ -13,7 +13,7 @@ import xml.etree.ElementTree
 
 ##### Main Menu funtion --start--
 def menu (mitem):
-    print ('\n\nBluepill scanner.\nPlease make a selection.\n   1: Add IPs\n   2: Run Scans\n   3: Clear IPs\n   4: Program select\n   5: List IPs\n   6: Rebuild IP list from files\n   7: Utilities\n   8: Exit')
+    print ('\n\nBlue-enum scanner.\nPlease make a selection.\n   1: Add IPs\n   2: Run Scans\n   3: Clear IPs\n   4: Program select\n   5: List IPs\n   6: Rebuild IP list from files\n   7: Utilities\n   8: Exit')
     try:
         while mitem == None:
             try:
@@ -90,17 +90,17 @@ def scanner (addresses):
     messages=["Runtime Messages:"]
     results=["Scan Results:"]
 
-    if not os.path.exists(os.path.dirname("./bluepill_outputs")):
+    if not os.path.exists(os.path.dirname("./blueenum_outputs")):
         print("No output directory found. Creating.")
-        q = Popen(["mkdir", "bluepill_outputs"])
+        q = Popen(["mkdir", "blueenum_outputs"])
         (qoutput, qerr) = q.communicate()
         qexit_code = q.wait()
         messages.append("Mkdir errors:")
         messages.append(qerr)
 
     for i in addresses:
-        if not os.path.isfile('./bluepill_outputs/' + i + '.xml'):
-            p = Popen(["nmap", "-A", "-oX"] + ["./bluepill_outputs/" + i + ".xml"] + [str(i)], stdout=PIPE)
+        if not os.path.isfile('./blueenum_outputs/' + i + '.xml'):
+            p = Popen(["nmap", "-A", "-oX"] + ["./blueenum_outputs/" + i + ".xml"] + [str(i)], stdout=PIPE)
             (output, err) = p.communicate()
             exit_code = p.wait()
             results.append(output)
@@ -131,7 +131,7 @@ def printaddrs (addresses):
 
 ##### Rebuild IP List function --start--
 def rebuildips(addresses):
-    files = os.listdir('./bluepill_outputs/')
+    files = os.listdir('./blueenum_outputs/')
     for f in files:
         if re.search("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", f):
             ip = re.search("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", f).group(0)
@@ -146,13 +146,13 @@ def rebuildips(addresses):
 def removedata(addr):
     addresses = [None]
     addresses = rebuildips(addresses)
-    files = os.listdir('./bluepill_outputs/')
+    files = os.listdir('./blueenum_outputs/')
     for a in addresses:
         for f in files:
             if re.search(a, f):
                 print(f)
                 try:
-                    os.remove('./bluepill_outputs/'+f)
+                    os.remove('./blueenum_outputs/'+f)
                 except OSError:
                     messages.append('No such file or directory.')
     addr = [None]
@@ -178,13 +178,13 @@ def removeitem(addr):
     except ValueError:
         print("Error: Did you add extra characters or use an invalid starting IP/subnet mask combination?")
         remips = None
-    files = os.listdir('./bluepill_outputs/')
+    files = os.listdir('./blueenum_outputs/')
     if remips != None:
         for ip in remips:
             for f in files:
                 if re.search(str(ip), f):
                     try:
-                        os.remove('./bluepill_outputs/'+f)
+                        os.remove('./blueenum_outputs/'+f)
                     except OSError:
                         messages.append('No such file or directory')
             for a in addr:
@@ -197,7 +197,7 @@ def removeitem(addr):
 def parse2enums(addresses):
     for i in addresses:
         try:
-            etree = xml.etree.ElementTree.parse('./bluepill_outputs/'+ i + '.xml')
+            etree = xml.etree.ElementTree.parse('./blueenum_outputs/'+ i + '.xml')
             etroot = etree.getroot()
             xmllooper(etroot, i)
         except:
@@ -217,7 +217,7 @@ def xmllooper(parent, ip):
 ##### Nikto Scan function --start--
 def niktoscan(address):
     try:
-        p = Popen(["nikto", "-h", address, "-output"] + ["./bluepill_outputs/nikto_" + address + ".xml"], stdout=PIPE)
+        p = Popen(["nikto", "-h", address, "-output"] + ["./blueenum_outputs/nikto_" + address + ".xml"], stdout=PIPE)
         (output, err) = p.communicate()
         exit_code = p.wait()
         if err != None:
