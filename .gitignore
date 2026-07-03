@@ -1,0 +1,14 @@
+# Scan output and backups
+blueenum_outputs/
+blueenum_backup_*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Editor / OS cruft
+*.swp
+*~
+.DS_Store
